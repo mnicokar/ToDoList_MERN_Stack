@@ -34,15 +34,18 @@ app.post("/todo/new", (req, res) => {
     });
 
     todo.save();
-    res.json();
+    res.json(todo);
 });
 
 //id is known as url parameter
 app.delete('/todo/delete/:id', async(req,res) => {
     // findByIdAndDelete is built into mongoose
     const result = await Todo.findByIdAndDelete(req.params.id);
-    res.json(result);
+
+    res.status(200).send({result});
 })
+
+
 
 app.get('/todo/complete/:id' , async (req,res) => {
     const todo = await Todo.findById(req.params.id);

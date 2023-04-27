@@ -1,5 +1,93 @@
 import { useState, useEffect } from "react";
+/*
 
+PRAJWAL BENEDICT A
+1 year ago
+I am having troubles once I delete a todo, the App crashes on the API side with this error: "app crashed - waiting for file changes before starting..."  
+Is there any error in the source code?
+
+3
+
+
+Reply
+
+
+8 replies
+wsq
+wsq
+11 months ago (edited)
+That is because it does a double Fetch/XHR request (once for delete, and once for completed - the delete button also triggers the click for marking as complete). First it deletes then MongoDb tries to find same record to toggle the complete property value and it cannot find it because it was deleted before. I think that can be solved with Event Stop Propagation (not sure how we can do that in React) or a different button for marking as complete (not clicking the entire div),  :). Thank you for the tutorial, awesome content!
+
+2
+
+
+Reply
+
+ADITYA PATEL
+ADITYA PATEL
+10 months ago
+await fetch(api_base + "/todo/delete/" + id, {
+      method: "DELETE",
+    });
+
+
+
+Reply
+
+2017 88 Saif Mohammed Omer
+2017 88 Saif Mohammed Omer
+8 months ago
+ @wsq  THANKS. It's working after making a separate button for complete.
+
+
+
+Reply
+
+Jade X
+Jade X
+8 months ago
+ @2017 88 Saif Mohammed Omer  could you please share the code? I am still stuck
+
+
+
+Reply
+
+2017 88 Saif Mohammed Omer
+2017 88 Saif Mohammed Omer
+8 months ago
+ @Jade X  basically I created a new div for the complete section
+
+
+
+Reply
+
+Tahira Ghaffar
+Tahira Ghaffar
+2 months ago
+Make sure you're not deleteing unchecked task, that will crash website
+Delete here is only working on Checked Tasks .
+Also make sure the code in App.js is as follows:
+const deleteTodo = async id => {
+    const data = await fetch(API_BASE + "/todo/delete/" + id, {
+        method : "DELETE"
+    }).then(res => res.json());
+
+    setTodos(todos => todos.filter(todo => todo._id !== data._id));
+  }
+
+
+
+Reply
+
+leon alex
+leon alex
+1 month ago
+ @Tahira Ghaffar  this doesn't work
+
+
+
+Reply
+*/
 const API_BASE = "http://localhost:3001";
 
 function App() {
@@ -16,7 +104,6 @@ function App() {
 
     useEffect(() => {
         GetTodos();
-        console.log(todos);
     }, []);
 
     const completeTodo = async (id) => {
@@ -29,6 +116,7 @@ function App() {
                 if (todo._id === data._id) {
                     todo.complete = data.complete;
                 }
+
                 return todo;
             })
         );
@@ -38,8 +126,9 @@ function App() {
         const data = await fetch(API_BASE + "/todo/delete/" + id, {
             method: "DELETE",
         }).then((res) => res.json());
-
-        setTodos((todos) => todos.filter((todo) => todo._id !== data._id));
+        setTodos((todos) =>
+            todos.filter((todo) => todo._id !== data.result._id)
+        );
     };
 
     const addTodo = async () => {
@@ -47,7 +136,7 @@ function App() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: newTodo }),
-        }).then(res => res.json());
+        }).then((res) => res.json());
 
         setTodos([...todos, data]);
         setPopupActive(false);
@@ -55,7 +144,7 @@ function App() {
     };
     return (
         <div className="App">
-            <h1>Welcome, Tyler</h1>
+            <h1>Welcome, Mobin</h1>
             <h4>Your Tasks</h4>
 
             <div className="todos">
@@ -69,11 +158,16 @@ function App() {
                     >
                         <div className="checkbox"></div>
 
-                        <div className="text">{todo.text}</div>
+                        <div className="text">
+                            {todo.text} {todo._id}
+                        </div>
 
                         <div
                             className="delete-todo"
-                            onClick={() => deleteToDo(todo._id)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                deleteToDo(todo._id);
+                              }}
                         >
                             X
                         </div>
