@@ -14,6 +14,7 @@ function App() {
             .catch((err) => console.error("Error: ", err));
     };
 
+
     useEffect(() => {
         GetTodos();
     }, []);
@@ -54,6 +55,8 @@ function App() {
         setPopupActive(false);
         setNewTodo("");
     };
+
+    console.log(todos);
     return (
         <div className="App">
             <h1>Welcome, Mobin</h1>
@@ -71,7 +74,7 @@ function App() {
                         <div className="checkbox"></div>
 
                         <div className="text">
-                            {todo.text} {todo._id}
+                            {todo.text}
                         </div>
 
                         <div
